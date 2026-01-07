@@ -19,6 +19,205 @@
       --ok: #28a745;              /* Green for success */
       --err: #dc3545;             /* Red for errors */
       --border: #dddddd;          /* Light border */
+      --input-bg: #ffffff;        /* Input background */
+      --result-bg: #f8f9fa;       /* Result item background */
+      --result-hover: #e9ecef;    /* Result item hover */
+      --code-bg: rgba(0, 48, 135, 0.1);  /* Code background */
+      --mark-bg: #fff3cd;         /* Highlight background */
+      --mark-text: #856404;       /* Highlight text */
+    }
+    
+    /* Dark theme */
+    [data-theme="dark"] {
+      --ercot-blue: #4d94ff;
+      --ercot-light-blue: #66a3ff;
+      --ercot-dark-blue: #3385ff;
+      --bg: #1a1a2e;
+      --panel: #16213e;
+      --text: #e8e8e8;
+      --muted: #a0a0a0;
+      --accent: #4d94ff;
+      --accent-d: #3385ff;
+      --ok: #4ade80;
+      --err: #f87171;
+      --border: #2d3748;
+      --input-bg: #1e2a47;
+      --result-bg: #1e2a47;
+      --result-hover: #283555;
+      --code-bg: rgba(77, 148, 255, 0.15);
+      --mark-bg: #4d3800;
+      --mark-text: #ffd966;
+    }
+    
+    [data-theme="dark"] .ercot-header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+    
+    [data-theme="dark"] input[type="text"],
+    [data-theme="dark"] select,
+    [data-theme="dark"] input[type="number"] {
+      background: var(--input-bg);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] input[type="text"]::placeholder {
+      color: #666;
+    }
+    
+    [data-theme="dark"] button {
+      background: linear-gradient(180deg, var(--ercot-light-blue), var(--ercot-blue));
+    }
+    
+    [data-theme="dark"] button:hover {
+      background: linear-gradient(180deg, var(--ercot-blue), var(--ercot-dark-blue));
+    }
+    
+    [data-theme="dark"] button.secondary {
+      background: var(--panel);
+      color: var(--accent);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] button.secondary:hover {
+      background: var(--result-bg);
+      border-color: var(--accent);
+    }
+    
+    [data-theme="dark"] .status {
+      background: var(--result-bg);
+    }
+    
+    [data-theme="dark"] .status.ok {
+      background: rgba(74, 222, 128, 0.15);
+      border-left-color: var(--ok);
+    }
+    
+    [data-theme="dark"] .status.err {
+      background: rgba(248, 113, 113, 0.15);
+      border-left-color: var(--err);
+    }
+    
+    [data-theme="dark"] .status.loading {
+      background: rgba(96, 165, 250, 0.15);
+      border-left-color: var(--accent);
+    }
+    
+    [data-theme="dark"] .spinner {
+      border-color: rgba(96, 165, 250, 0.2);
+      border-top-color: var(--accent);
+    }
+    
+    [data-theme="dark"] .skeleton {
+      background: linear-gradient(90deg, var(--result-bg) 25%, var(--result-hover) 50%, var(--result-bg) 75%);
+      background-size: 200% 100%;
+    }
+    
+    [data-theme="dark"] .results {
+      background: var(--panel);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] .result-item {
+      background: var(--result-bg);
+      border-left-color: var(--accent);
+    }
+    
+    [data-theme="dark"] .result-item:hover {
+      background: var(--result-hover);
+    }
+    
+    [data-theme="dark"] .result-item.collapsed .result-text {
+      background: var(--panel);
+    }
+    
+    [data-theme="dark"] .collapse-toggle {
+      background: var(--panel);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] .collapse-toggle:hover {
+      background: var(--result-hover);
+    }
+    
+    [data-theme="dark"] .collapse-all-controls button {
+      background: var(--panel);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    
+    [data-theme="dark"] .collapse-all-controls button:hover {
+      background: var(--result-hover);
+    }
+    
+    [data-theme="dark"] .export-dropdown {
+      background: var(--panel);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] .export-dropdown button {
+      color: var(--text);
+    }
+    
+    [data-theme="dark"] .export-dropdown button:hover {
+      background: var(--result-hover);
+    }
+    
+    [data-theme="dark"] .result-text mark {
+      background: var(--mark-bg);
+      color: var(--mark-text);
+    }
+    
+    [data-theme="dark"] .pagination {
+      background: var(--result-bg);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] .pagination button:disabled {
+      background: var(--panel);
+      color: var(--muted);
+    }
+    
+    [data-theme="dark"] .help-section {
+      background: linear-gradient(135deg, #1e2a47 0%, #16213e 100%);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] .help-desc code {
+      background: var(--code-bg);
+      color: var(--accent);
+    }
+    
+    [data-theme="dark"] .footer {
+      background: var(--panel);
+      border-top-color: var(--border);
+    }
+    
+    /* Theme toggle button */
+    .theme-toggle {
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+      min-width: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .theme-toggle:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+    .theme-toggle .theme-icon {
+      font-size: 1.2rem;
+    }
+    .theme-toggle .theme-label {
+      font-size: 0.85rem;
+      font-weight: 500;
     }
     body {
       margin: 0;
@@ -167,6 +366,9 @@
       padding: 0.5rem;
       border-radius: 4px;
       background: #f8f9fa;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
     .status.ok { 
       color: var(--ok); 
@@ -177,6 +379,72 @@
       color: var(--err);
       background: #f8d7da;
       border-left: 3px solid var(--err);
+    }
+    .status.loading {
+      color: var(--ercot-blue);
+      background: rgba(0, 102, 204, 0.1);
+      border-left: 3px solid var(--ercot-blue);
+    }
+    
+    /* Loading Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(0, 102, 204, 0.2);
+      border-top-color: var(--ercot-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Skeleton loading for results */
+    .skeleton-container {
+      padding: 1rem;
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+    .skeleton-header {
+      height: 24px;
+      width: 60%;
+      margin-bottom: 1rem;
+    }
+    .skeleton-item {
+      height: 80px;
+      margin-bottom: 0.5rem;
+      border-radius: 6px;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    /* Button loading state */
+    button.loading {
+      position: relative;
+      color: transparent;
+      pointer-events: none;
+    }
+    button.loading::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      top: 50%;
+      left: 50%;
+      margin-left: -9px;
+      margin-top: -9px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
     .results {
       margin-top: 1rem;
@@ -201,8 +469,8 @@
       font-weight: 600;
     }
     .result-item {
-      margin-bottom: 1rem;
-      padding: 1rem;
+      margin-bottom: 0.5rem;
+      padding: 0.75rem;
       background: #f8f9fa;
       border-radius: 6px;
       border-left: 4px solid var(--ercot-blue);
@@ -211,6 +479,103 @@
     .result-item:hover {
       background: #e9ecef;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Collapsible result styles */
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .result-header-content {
+      flex: 1;
+    }
+    .collapse-toggle {
+      background: #e9ecef;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--text);
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .collapse-toggle:hover {
+      background: #dee2e6;
+    }
+    .result-item .result-text {
+      max-height: 500px;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out;
+    }
+    .result-item.collapsed .result-text {
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      opacity: 0;
+    }
+    .result-item.collapsed {
+      padding-bottom: 0.5rem;
+    }
+    .collapse-all-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      justify-content: flex-end;
+    }
+    .collapse-all-controls button {
+      background: #e9ecef;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.4rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .collapse-all-controls button:hover {
+      background: #dee2e6;
+    }
+    .export-container {
+      position: relative;
+    }
+    .export-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+      min-width: 140px;
+      margin-top: 4px;
+    }
+    .export-dropdown.show {
+      display: block;
+    }
+    .export-dropdown button {
+      display: block;
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+    .export-dropdown button:hover {
+      background: #f0f0f0;
+    }
+    .export-dropdown button:first-child {
+      border-radius: 4px 4px 0 0;
+    }
+    .export-dropdown button:last-child {
+      border-radius: 0 0 4px 4px;
     }
     .result-file {
       margin-bottom: 0.5rem;
@@ -381,6 +746,110 @@
       padding: 0.75rem;
       font-size: 1rem;
     }
+    
+    /* Search History Styles */
+    .search-history-container {
+      position: relative;
+    }
+    .search-history {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+    }
+    .search-history.show {
+      display: block;
+    }
+    .search-history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      background: var(--result-bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .search-history-clear {
+      background: none;
+      border: none;
+      color: var(--err);
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      min-width: auto;
+    }
+    .search-history-clear:hover {
+      background: rgba(220, 53, 69, 0.1);
+    }
+    .search-history-item {
+      padding: 0.6rem 0.75rem;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.15s;
+    }
+    .search-history-item:last-child {
+      border-bottom: none;
+    }
+    .search-history-item:hover {
+      background: var(--result-bg);
+    }
+    .search-history-item .history-icon {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .search-history-item .history-query {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text);
+    }
+    .search-history-item .history-time {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .search-history-item .history-delete {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0.2rem;
+      font-size: 0.8rem;
+      opacity: 0;
+      transition: opacity 0.15s;
+      min-width: auto;
+    }
+    .search-history-item:hover .history-delete {
+      opacity: 1;
+    }
+    .search-history-item .history-delete:hover {
+      color: var(--err);
+    }
+    .search-history-empty {
+      padding: 1rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    #btnHistory {
+      min-width: 40px;
+      padding: 0.75rem;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -389,6 +858,10 @@
       <div class="ercot-logo">ERCOT</div>
       <div class="ercot-title">ERCOT Internal Knowledge Base Tool</div>
       <div class="header-actions">
+        <button class="theme-toggle" id="btnTheme" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+          <span class="theme-icon">🌙</span>
+          <span class="theme-label">Dark</span>
+        </button>
         <button class="rebuild-btn" id="btnRebuild" onclick="rebuildIndex()">🔄 Rebuild Index</button>
       </div>
     </div>
@@ -403,9 +876,13 @@
     <div class="card">
       <form id="searchForm">
         <div class="row">
-          <input id="query" type="text" placeholder="Ask something…" required />
+          <div class="search-history-container" style="flex:1">
+            <input id="query" type="text" placeholder="Ask something…" required autocomplete="off" />
+            <div id="searchHistory" class="search-history"></div>
+          </div>
           <div style="display:flex; gap:.5rem">
             <button type="submit" id="btnSearch">Search</button>
+            <button type="button" class="secondary" id="btnHistory" onclick="toggleSearchHistory()" title="Search History">🕐</button>
             <button type="button" class="secondary" id="btnLucky">I'm Feeling Lucky</button>
             <button type="button" class="secondary" id="btnClear" onclick="clearResults()" title="Clear Results">🗑️ Clear</button>
             <button type="button" class="secondary" id="btnHelp" onclick="toggleHelp()" title="Show Help">❓</button>
@@ -458,7 +935,7 @@
             <div>
               <label for="provider" style="display:block; margin-bottom:.25rem; color: var(--muted)">Provider</label>
               <select id="provider">
-                <option value="simple" selected>simple (local synthesizer)</option>
+                <option value="simple" selected>simple search</option>
                 <option value="openai">openai (requires OPENAI_API_KEY)</option>
                 <option value="local">local (llama-cpp)</option>
                 <option value="gpt4all">gpt4all</option>
@@ -497,6 +974,376 @@
   </div>
 
   <script>
+    // Theme management
+    function initTheme() {
+      const savedTheme = localStorage.getItem('rag-theme') || 'light';
+      setTheme(savedTheme);
+    }
+    
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('rag-theme', theme);
+      updateThemeButton(theme);
+    }
+    
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      setTheme(newTheme);
+    }
+    
+    function updateThemeButton(theme) {
+      const btn = document.getElementById('btnTheme');
+      if (!btn) return;
+      const icon = btn.querySelector('.theme-icon');
+      const label = btn.querySelector('.theme-label');
+      if (theme === 'dark') {
+        icon.textContent = '☀️';
+        label.textContent = 'Light';
+        btn.title = 'Switch to Light Mode';
+      } else {
+        icon.textContent = '🌙';
+        label.textContent = 'Dark';
+        btn.title = 'Switch to Dark Mode';
+      }
+    }
+    
+    // Initialize theme on page load
+    initTheme();
+    
+    // Search History Management
+    const HISTORY_KEY = 'rag-search-history';
+    const MAX_HISTORY = 20;
+    
+    function getSearchHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+    
+    function saveSearchHistory(history) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
+    
+    function addToHistory(query) {
+      const q = query.trim();
+      if (!q) return;
+      
+      let history = getSearchHistory();
+      // Remove duplicate if exists
+      history = history.filter(item => item.query.toLowerCase() !== q.toLowerCase());
+      // Add new entry at the beginning
+      history.unshift({
+        query: q,
+        timestamp: Date.now()
+      });
+      // Keep only MAX_HISTORY items
+      history = history.slice(0, MAX_HISTORY);
+      saveSearchHistory(history);
+    }
+    
+    function removeFromHistory(index) {
+      let history = getSearchHistory();
+      history.splice(index, 1);
+      saveSearchHistory(history);
+      renderSearchHistory();
+    }
+    
+    function clearSearchHistory() {
+      localStorage.removeItem(HISTORY_KEY);
+      renderSearchHistory();
+    }
+    
+    function formatTimeAgo(timestamp) {
+      const seconds = Math.floor((Date.now() - timestamp) / 1000);
+      if (seconds < 60) return 'just now';
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      const days = Math.floor(hours / 24);
+      if (days < 7) return `${days}d ago`;
+      return new Date(timestamp).toLocaleDateString();
+    }
+    
+    function renderSearchHistory() {
+      const container = document.getElementById('searchHistory');
+      const history = getSearchHistory();
+      
+      if (history.length === 0) {
+        container.innerHTML = '<div class="search-history-empty">No search history yet</div>';
+        return;
+      }
+      
+      let html = `
+        <div class="search-history-header">
+          <span>🕐 Recent Searches (${history.length})</span>
+          <button type="button" class="search-history-clear" onclick="clearSearchHistory()">Clear All</button>
+        </div>
+      `;
+      
+      history.forEach((item, index) => {
+        html += `
+          <div class="search-history-item" onclick="selectHistoryItem('${escapeHtml(item.query.replace(/'/g, "\\'"))}')">
+            <span class="history-icon">🔍</span>
+            <span class="history-query">${escapeHtml(item.query)}</span>
+            <span class="history-time">${formatTimeAgo(item.timestamp)}</span>
+            <button type="button" class="history-delete" onclick="event.stopPropagation(); removeFromHistory(${index})" title="Remove">✕</button>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+    
+    function selectHistoryItem(query) {
+      document.getElementById('query').value = query;
+      hideSearchHistory();
+      document.getElementById('searchForm').dispatchEvent(new Event('submit'));
+    }
+    
+    function toggleSearchHistory() {
+      const container = document.getElementById('searchHistory');
+      if (container.classList.contains('show')) {
+        hideSearchHistory();
+      } else {
+        showSearchHistory();
+      }
+    }
+    
+    function showSearchHistory() {
+      renderSearchHistory();
+      document.getElementById('searchHistory').classList.add('show');
+    }
+    
+    function hideSearchHistory() {
+      document.getElementById('searchHistory').classList.remove('show');
+    }
+
+    // Close history when clicking outside
+    document.addEventListener('click', (e) => {
+      const container = document.getElementById('searchHistory');
+      const historyBtn = document.getElementById('btnHistory');
+      const queryInput = document.getElementById('query');
+      if (!container.contains(e.target) && e.target !== historyBtn && e.target !== queryInput) {
+        hideSearchHistory();
+      }
+    });
+
+    // Collapsible Results Functions
+    function toggleResultCollapse(btn) {
+      const resultItem = btn.closest('.result-item');
+      if (resultItem.classList.contains('collapsed')) {
+        resultItem.classList.remove('collapsed');
+        btn.textContent = '▲ Collapse';
+        btn.title = 'Collapse this result';
+      } else {
+        resultItem.classList.add('collapsed');
+        btn.textContent = '▼ Expand';
+        btn.title = 'Expand this result';
+      }
+    }
+
+    function collapseAllResults() {
+      const results = document.querySelectorAll('.result-item');
+      results.forEach(item => {
+        item.classList.add('collapsed');
+        const btn = item.querySelector('.collapse-toggle');
+        if (btn) {
+          btn.textContent = '▼ Expand';
+          btn.title = 'Expand this result';
+        }
+      });
+    }
+
+    function expandAllResults() {
+      const results = document.querySelectorAll('.result-item');
+      results.forEach(item => {
+        item.classList.remove('collapsed');
+        const btn = item.querySelector('.collapse-toggle');
+        if (btn) {
+          btn.textContent = '▲ Collapse';
+          btn.title = 'Collapse this result';
+        }
+      });
+    }
+
+    // Export Results Functions
+    function toggleExportMenu(event) {
+      event.stopPropagation();
+      const dropdown = document.getElementById('exportDropdown');
+      dropdown.classList.toggle('show');
+    }
+
+    // Close export dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('exportDropdown');
+      if (dropdown && !e.target.closest('.export-container')) {
+        dropdown.classList.remove('show');
+      }
+    });
+
+    function exportResults(format) {
+      const dropdown = document.getElementById('exportDropdown');
+      dropdown.classList.remove('show');
+      
+      if (!currentData) {
+        alert('No results to export');
+        return;
+      }
+      
+      const resultItems = document.querySelectorAll('.result-item');
+      if (resultItems.length === 0) {
+        alert('No results to export');
+        return;
+      }
+      
+      // Extract data from result items
+      const results = [];
+      resultItems.forEach((item, index) => {
+        const fileLink = item.querySelector('.result-file a');
+        const locationSpan = item.querySelector('.result-location');
+        const textDiv = item.querySelector('.result-text');
+        
+        results.push({
+          index: index + 1,
+          file: fileLink ? fileLink.textContent.trim() : '',
+          location: locationSpan ? locationSpan.textContent.trim() : '',
+          text: textDiv ? textDiv.textContent.trim() : ''
+        });
+      });
+      
+      let content, filename, mimeType;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      
+      switch (format) {
+        case 'csv':
+          content = exportToCSV(results);
+          filename = `search_results_${timestamp}.csv`;
+          mimeType = 'text/csv';
+          break;
+        case 'json':
+          content = exportToJSON(results);
+          filename = `search_results_${timestamp}.json`;
+          mimeType = 'application/json';
+          break;
+        case 'txt':
+          content = exportToText(results);
+          filename = `search_results_${timestamp}.txt`;
+          mimeType = 'text/plain';
+          break;
+        default:
+          return;
+      }
+      
+      downloadFile(content, filename, mimeType);
+    }
+
+    function exportToCSV(results) {
+      const headers = ['#', 'File', 'Location', 'Text'];
+      const rows = results.map(r => [
+        r.index,
+        `"${r.file.replace(/"/g, '""')}"`,
+        `"${r.location.replace(/"/g, '""')}"`,
+        `"${r.text.replace(/"/g, '""').replace(/\n/g, ' ')}"`
+      ]);
+      return [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    }
+
+    function exportToJSON(results) {
+      const query = els.query.value.trim();
+      return JSON.stringify({
+        query: query,
+        exportDate: new Date().toISOString(),
+        totalResults: results.length,
+        results: results
+      }, null, 2);
+    }
+
+    function exportToText(results) {
+      const query = els.query.value.trim();
+      let text = `Search Results for: "${query}"\n`;
+      text += `Exported: ${new Date().toLocaleString()}\n`;
+      text += `Total Results: ${results.length}\n`;
+      text += '='.repeat(60) + '\n\n';
+      
+      results.forEach(r => {
+        text += `[${r.index}] ${r.file}\n`;
+        text += `    ${r.location}\n`;
+        text += `    ${r.text.substring(0, 200)}${r.text.length > 200 ? '...' : ''}\n\n`;
+      });
+      
+      return text;
+    }
+
+    function downloadFile(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    // Make result items collapsible by wrapping content
+    function makeResultsCollapsible(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const resultItems = doc.querySelectorAll('.result-item');
+      
+      resultItems.forEach((item, index) => {
+        // Find the file info and text content
+        const fileDiv = item.querySelector('.result-file');
+        const textDiv = item.querySelector('.result-text');
+        
+        if (fileDiv && textDiv) {
+          // Create header wrapper
+          const header = document.createElement('div');
+          header.className = 'result-header';
+          
+          const headerContent = document.createElement('div');
+          headerContent.className = 'result-header-content';
+          headerContent.appendChild(fileDiv.cloneNode(true));
+          
+          const toggleBtn = document.createElement('button');
+          toggleBtn.className = 'collapse-toggle';
+          toggleBtn.textContent = '▲ Collapse';
+          toggleBtn.title = 'Collapse this result';
+          toggleBtn.setAttribute('onclick', 'toggleResultCollapse(this)');
+          
+          header.appendChild(headerContent);
+          header.appendChild(toggleBtn);
+          
+          // Replace original file div with header
+          fileDiv.parentNode.replaceChild(header, fileDiv);
+        }
+      });
+      
+      // Add collapse all controls at the beginning if there are results
+      if (resultItems.length > 0) {
+        const controlsHtml = `<div class="collapse-all-controls">
+          ${resultItems.length > 1 ? '<button onclick="expandAllResults()" title="Expand all results">📖 Expand All</button>' : ''}
+          ${resultItems.length > 1 ? '<button onclick="collapseAllResults()" title="Collapse all results">📕 Collapse All</button>' : ''}
+          <div class="export-container">
+            <button onclick="toggleExportMenu(event)" title="Export results">📥 Export</button>
+            <div id="exportDropdown" class="export-dropdown">
+              <button onclick="exportResults('csv')">📄 Export as CSV</button>
+              <button onclick="exportResults('json')">📋 Export as JSON</button>
+              <button onclick="exportResults('txt')">📝 Export as Text</button>
+            </div>
+          </div>
+        </div>`;
+        return controlsHtml + doc.body.innerHTML;
+      }
+      
+      return doc.body.innerHTML;
+    }
+
     // If you serve this page from a different origin, set API_BASE to that URL.
     const API_BASE = ''; // '' means same origin, e.g., http://localhost:8000
 
@@ -509,6 +1356,7 @@
       btnSearch: document.getElementById('btnSearch'),
       btnLucky: document.getElementById('btnLucky'),
       btnRebuild: document.getElementById('btnRebuild'),
+      btnHistory: document.getElementById('btnHistory'),
       status: document.getElementById('status'),
       results: document.getElementById('results')
     };
@@ -551,9 +1399,26 @@
     }
 
     function showStatus(text, type='') {
-      els.status.textContent = text;
+      if (type === 'loading') {
+        els.status.innerHTML = `<span class="spinner"></span><span>${text}</span>`;
+      } else {
+        els.status.innerHTML = text;
+      }
       els.status.className = `status ${type}`;
     }
+    
+    function showLoadingSkeleton() {
+      els.results.innerHTML = `
+        <div class="skeleton-container">
+          <div class="skeleton skeleton-header"></div>
+          <div class="skeleton skeleton-item"></div>
+          <div class="skeleton skeleton-item"></div>
+          <div class="skeleton skeleton-item"></div>
+        </div>
+      `;
+      els.results.hidden = false;
+    }
+    
     function showResults(data, page = 1) {
       currentData = data;
       currentPage = page;
@@ -600,6 +1465,9 @@
         content += currentData.htmlHeader;
         content += pageResults.map(item => item.outerHTML).join('');
         
+        // Apply collapsible functionality
+        content = makeResultsCollapsible(content);
+        
         // Add pagination controls
         if (totalPages > 1) {
           content += '<div class="pagination">';
@@ -640,6 +1508,8 @@
       // Render answer as HTML if it contains HTML tags, otherwise as text
       if (isHtml) {
         content += answer;
+        // Apply collapsible functionality for HTML content
+        content = makeResultsCollapsible(content);
       } else {
         content += `<pre>${escapeHtml(answer)}</pre>`;
       }
@@ -743,8 +1613,10 @@
       const payload = { q, per_page, page, provider };
       if (index_path) payload.index_path = index_path;
 
-      showStatus('Searching…');
-      els.results.hidden = true;
+      showStatus('Searching…', 'loading');
+      showLoadingSkeleton();
+      els.btnSearch.classList.add('loading');
+      
       try {
         const resp = await fetch(`${API_BASE}/query`, {
           method: 'POST',
@@ -760,6 +1632,9 @@
         showResults(data);
       } catch (e) {
         showStatus(`Error: ${e.message}`, 'err');
+        els.results.hidden = true;
+      } finally {
+        els.btnSearch.classList.remove('loading');
       }
     }
 
@@ -769,6 +1644,8 @@
       const q = els.query.value.trim();
       if (!q) return;
       await runQuery(q);
+      addToHistory(q);
+      hideSearchHistory();
     });
     els.btnLucky.addEventListener('click', async () => {
       const samples = [
@@ -783,6 +1660,28 @@
       ];
       els.query.value = samples[Math.floor(Math.random() * samples.length)];
       els.form.dispatchEvent(new Event('submit'));
+    });
+
+    // Search history events
+    els.btnHistory.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleSearchHistory();
+    });
+
+    els.query.addEventListener('focus', () => {
+      const history = getSearchHistory();
+      if (history.length > 0) {
+        showSearchHistory();
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const container = document.querySelector('.search-history-container');
+      if (container && !container.contains(e.target)) {
+        hideSearchHistory();
+      }
     });
 
     // Initial
