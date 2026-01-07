@@ -1,0 +1,792 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>RAG Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --ercot-blue: #003087;      /* ERCOT primary blue */
+      --ercot-light-blue: #0066cc;
+      --ercot-dark-blue: #002060;
+      --bg: #f5f5f5;              /* Light gray background */
+      --panel: #ffffff;           /* White panels */
+      --text: #333333;            /* Dark gray text */
+      --muted: #666666;           /* Muted gray */
+      --accent: #0066cc;          /* ERCOT blue accent */
+      --accent-d: #003087;        /* Darker blue */
+      --ok: #28a745;              /* Green for success */
+      --err: #dc3545;             /* Red for errors */
+      --border: #dddddd;          /* Light border */
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+    .ercot-header {
+      background: linear-gradient(135deg, var(--ercot-dark-blue) 0%, var(--ercot-blue) 100%);
+      color: white;
+      padding: 1rem 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    .ercot-header .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ercot-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: white;
+    }
+    .ercot-title {
+      font-size: 1.1rem;
+      font-weight: 300;
+      opacity: 0.95;
+    }
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .rebuild-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      min-width: auto;
+    }
+    .rebuild-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+    .rebuild-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .rebuild-btn.rebuilding {
+      background: rgba(255, 200, 0, 0.3);
+      border-color: rgba(255, 200, 0, 0.5);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 3px solid var(--ercot-blue);
+    }
+    h1 {
+      margin: 0 0 .25rem 0;
+      font-size: 1.75rem;
+      letter-spacing: 0.5px;
+      color: var(--ercot-blue);
+      font-weight: 600;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: .75rem;
+      margin-top: .5rem;
+    }
+    input[type="text"], select, input[type="number"] {
+      width: 100%;
+      padding: .7rem .8rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      outline: none;
+      font-size: 0.95rem;
+    }
+    input[type="text"]:focus, select:focus, input[type="number"]:focus {
+      border-color: var(--ercot-blue);
+      box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+    }
+    input[type="text"]::placeholder { color: #999; }
+    button {
+      padding: .75rem 1.25rem;
+      border-radius: 4px;
+      border: none;
+      background: linear-gradient(180deg, var(--ercot-light-blue), var(--ercot-blue));
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      min-width: 120px;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+    button:hover {
+      background: linear-gradient(180deg, var(--ercot-blue), var(--ercot-dark-blue));
+      box-shadow: 0 2px 6px rgba(0, 48, 135, 0.3);
+    }
+    button.secondary {
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--ercot-blue);
+    }
+    button.secondary:hover {
+      background: #f8f9fa;
+      border-color: var(--ercot-blue);
+    }
+    .opts {
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      gap: .75rem;
+    }
+    .status {
+      margin-top: .5rem;
+      font-size: .9rem;
+      color: var(--muted);
+      padding: 0.5rem;
+      border-radius: 4px;
+      background: #f8f9fa;
+    }
+    .status.ok { 
+      color: var(--ok); 
+      background: #d4edda;
+      border-left: 3px solid var(--ok);
+    }
+    .status.err { 
+      color: var(--err);
+      background: #f8d7da;
+      border-left: 3px solid var(--err);
+    }
+    .results {
+      margin-top: 1rem;
+      line-height: 1.5;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      overflow-x: auto;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    .results pre {
+      white-space: pre-wrap;
+      margin: 0;
+    }
+    .search-header {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--ercot-blue);
+      color: var(--ercot-blue);
+      font-weight: 600;
+    }
+    .result-item {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border-left: 4px solid var(--ercot-blue);
+      transition: all 0.2s;
+    }
+    .result-item:hover {
+      background: #e9ecef;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    .result-file {
+      margin-bottom: 0.5rem;
+    }
+    .result-file a {
+      color: var(--ercot-blue);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .result-file a:hover {
+      text-decoration: underline;
+      color: var(--ercot-dark-blue);
+    }
+    .result-location {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .pdf-link {
+      margin-left: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+      color: white !important;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .pdf-link:hover {
+      background: linear-gradient(135deg, #c82333 0%, #a71d2a 100%);
+      text-decoration: none !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .result-text {
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9rem;
+      color: var(--text);
+      word-break: break-word;
+    }
+    .result-text mark {
+      background: #fff3cd;
+      color: #856404;
+      padding: 2px 4px;
+      border-radius: 2px;
+      font-weight: 500;
+    }
+    .footer {
+      margin-top: 3rem;
+      padding: 2rem 0;
+      color: var(--muted);
+      font-size: .85rem;
+      border-top: 1px solid var(--border);
+      background: white;
+    }
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    .list {
+      margin: .5rem 0 1rem 0;
+      padding-left: 1.5rem;
+    }
+    .list li {
+      margin: .25rem 0;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .pagination button {
+      padding: 0.5rem 1rem;
+      min-width: 90px;
+      font-size: 0.9rem;
+    }
+    .pagination button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #e9ecef;
+      color: #6c757d;
+    }
+    .pagination .page-info {
+      color: var(--text);
+      font-weight: 600;
+      margin: 0 1rem;
+    }
+    /* Help Section Styles */
+    .help-section {
+      margin-top: 1rem;
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+      border: 1px solid var(--ercot-light-blue);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 48, 135, 0.1);
+    }
+    .help-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg, var(--ercot-blue) 0%, var(--ercot-light-blue) 100%);
+      color: white;
+    }
+    .help-close {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      min-width: auto;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .help-close:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .help-content {
+      padding: 1rem;
+    }
+    .help-item {
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(0, 102, 204, 0.15);
+    }
+    .help-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .help-label {
+      font-weight: 600;
+      color: var(--ercot-blue);
+      margin-bottom: 0.25rem;
+    }
+    .help-desc {
+      color: var(--text);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .help-desc code {
+      background: rgba(0, 48, 135, 0.1);
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      font-family: 'Consolas', monospace;
+      font-size: 0.85rem;
+      color: var(--ercot-blue);
+    }
+    .help-desc ul {
+      list-style-type: disc;
+    }
+    .help-desc li {
+      margin: 0.25rem 0;
+    }
+    #btnHelp {
+      min-width: 40px;
+      padding: 0.75rem;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="ercot-header">
+    <div class="header-content">
+      <div class="ercot-logo">ERCOT</div>
+      <div class="ercot-title">ERCOT Internal Knowledge Base Tool</div>
+      <div class="header-actions">
+        <button class="rebuild-btn" id="btnRebuild" onclick="rebuildIndex()">🔄 Rebuild Index</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="container">
+    <header>
+      <h1>Document Search & Analysis</h1>
+      <div class="subtitle">Electric Reliability Council of Texas - Internal Knowledge Base</div>
+    </header>
+
+    <div class="card">
+      <form id="searchForm">
+        <div class="row">
+          <input id="query" type="text" placeholder="Ask something…" required />
+          <div style="display:flex; gap:.5rem">
+            <button type="submit" id="btnSearch">Search</button>
+            <button type="button" class="secondary" id="btnLucky">I'm Feeling Lucky</button>
+            <button type="button" class="secondary" id="btnClear" onclick="clearResults()" title="Clear Results">🗑️ Clear</button>
+            <button type="button" class="secondary" id="btnHelp" onclick="toggleHelp()" title="Show Help">❓</button>
+          </div>
+        </div>
+
+        <!-- Help Section -->
+        <div id="helpSection" class="help-section" style="display:none">
+          <div class="help-header">
+            <strong>🔍 Search Parameters Help</strong>
+            <button type="button" class="help-close" onclick="toggleHelp()">✕</button>
+          </div>
+          <div class="help-content">
+            <div class="help-item">
+              <div class="help-label">Search Query</div>
+              <div class="help-desc">Enter keywords, phrases, or questions to search across all indexed documents. The search is case-insensitive. Examples: <code>RPC error</code>, <code>HABITAT plugin</code>, <code>connection timeout</code></div>
+            </div>
+            <div class="help-item">
+              <div class="help-label">Provider</div>
+              <div class="help-desc">
+                <ul style="margin:0.25rem 0 0 1rem; padding:0;">
+                  <li><strong>simple</strong> - Fast text search across all documents (recommended, no API needed)</li>
+                  <li><strong>openai</strong> - AI-powered answers using GPT-3.5 (requires OPENAI_API_KEY)</li>
+                  <li><strong>local</strong> - Offline AI using llama.cpp (requires model download)</li>
+                  <li><strong>gpt4all</strong> - Offline AI using GPT4All (requires model download)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="help-item">
+              <div class="help-label">Results per page</div>
+              <div class="help-desc">Number of search results to display on each page (1-50). Use pagination buttons to navigate through all results.</div>
+            </div>
+            <div class="help-item">
+              <div class="help-label">Index Path (optional)</div>
+              <div class="help-desc">Advanced: Specify a custom index file path. Leave blank to use the default server index (<code>data/index.joblib</code>). Only use this if you have multiple index files.</div>
+            </div>
+            <div class="help-item">
+              <div class="help-label">I'm Feeling Lucky</div>
+              <div class="help-desc">Click to auto-fill a random sample search query for quick testing.</div>
+            </div>
+            <div class="help-item">
+              <div class="help-label">🔄 Rebuild Index</div>
+              <div class="help-desc">Click the button in the header to rebuild the search index after adding new files to the <code>data/</code> folder.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="opts" style="margin-top:.75rem">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:.75rem">
+            <div>
+              <label for="provider" style="display:block; margin-bottom:.25rem; color: var(--muted)">Provider</label>
+              <select id="provider">
+                <option value="simple" selected>simple (local synthesizer)</option>
+                <option value="openai">openai (requires OPENAI_API_KEY)</option>
+                <option value="local">local (llama-cpp)</option>
+                <option value="gpt4all">gpt4all</option>
+              </select>
+            </div>
+            <div>
+              <label for="topk" style="display:block; margin-bottom:.25rem; color: var(--muted)">Results per page</label>
+              <input id="topk" type="number" min="1" max="50" value="10" />
+            </div>
+          </div>
+          <div>
+            <label for="indexPath" style="display:block; margin-bottom:.25rem; color: var(--muted)">Index Path (optional)</label>
+            <input id="indexPath" type="text" placeholder="Leave blank to use server's default index" />
+          </div>
+        </div>
+
+        <div id="status" class="status">Checking server…</div>
+      </form>
+
+      <div id="results" class="results" hidden></div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-content">
+        <p><strong>ERCOT Document Search Tool</strong> - A RAG-powered search system for internal documentation</p>
+        <ul class="list">
+          <li>Submit queries to <code>POST /query</code> on the same origin</li>
+          <li>Backend health reports <code>index_loaded: true</code> when ready</li>
+          <li><strong>NOTE: Data is confidential. Please do not share externally.</strong></li>
+        </ul>
+        <p style="margin-top: 1rem; font-size: 0.8rem; color: #999;">
+          © 2026 Electric Reliability Council of Texas, Inc. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // If you serve this page from a different origin, set API_BASE to that URL.
+    const API_BASE = ''; // '' means same origin, e.g., http://localhost:8000
+
+    const els = {
+      form: document.getElementById('searchForm'),
+      query: document.getElementById('query'),
+      provider: document.getElementById('provider'),
+      topk: document.getElementById('topk'),
+      indexPath: document.getElementById('indexPath'),
+      btnSearch: document.getElementById('btnSearch'),
+      btnLucky: document.getElementById('btnLucky'),
+      btnRebuild: document.getElementById('btnRebuild'),
+      status: document.getElementById('status'),
+      results: document.getElementById('results')
+    };
+    
+    // Pagination state
+    let currentPage = 1;
+    let currentData = null;
+
+    async function rebuildIndex() {
+      const btn = els.btnRebuild;
+      btn.disabled = true;
+      btn.classList.add('rebuilding');
+      btn.textContent = '⏳ Rebuilding...';
+      
+      showStatus('Rebuilding index... This may take a moment.');
+      
+      try {
+        const resp = await fetch(`${API_BASE}/rebuild-index`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!resp.ok) {
+          const errText = await resp.text();
+          throw new Error(`HTTP ${resp.status}: ${errText}`);
+        }
+        
+        const data = await resp.json();
+        showStatus(`✅ Index rebuilt successfully! ${data.num_documents} documents indexed.`, 'ok');
+        
+        // Refresh health check
+        setTimeout(health, 1000);
+      } catch (e) {
+        showStatus(`❌ Rebuild failed: ${e.message}`, 'err');
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('rebuilding');
+        btn.textContent = '🔄 Rebuild Index';
+      }
+    }
+
+    function showStatus(text, type='') {
+      els.status.textContent = text;
+      els.status.className = `status ${type}`;
+    }
+    function showResults(data, page = 1) {
+      currentData = data;
+      currentPage = page;
+      
+      const provider = els.provider.value || 'simple';
+      const per_page = parseInt(els.topk.value || '10', 10);
+      let answer = data.answer || '(no answer)';
+      let pagination = data.pagination || {};
+      
+      // Check if answer contains HTML (from simple provider)
+      const isHtml = answer.includes('<div class="search-header">') || answer.includes('<div class="result-item">');
+      
+      let content = '';
+      
+      // For simple provider with HTML results, paginate the HTML content
+      if (provider === 'simple' && isHtml) {
+        // Parse HTML to extract header and results
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(answer, 'text/html');
+        const headerDiv = doc.querySelector('.search-header');
+        const resultItems = Array.from(doc.querySelectorAll('.result-item'));
+        
+        // Store all results for pagination
+        if (!currentData.htmlResults) {
+          currentData.htmlResults = resultItems;
+          currentData.htmlHeader = headerDiv ? headerDiv.outerHTML : '';
+        }
+        
+        const totalResults = resultItems.length;
+        const totalPages = Math.ceil(totalResults / per_page);
+        const validPage = Math.max(1, Math.min(page, totalPages));
+        
+        // Calculate pagination
+        const startIdx = (validPage - 1) * per_page;
+        const endIdx = startIdx + per_page;
+        const pageResults = resultItems.slice(startIdx, endIdx);
+        
+        // Add pagination info header
+        content += `<div style="margin-bottom: 1rem; padding: 0.75rem; background: rgba(59, 130, 246, 0.15); border-radius: 8px; border-left: 3px solid var(--accent);">`;
+        content += `<strong>Showing results ${startIdx + 1}-${Math.min(endIdx, totalResults)} of ${totalResults}</strong> (Page ${validPage} of ${totalPages})`;
+        content += `</div>`;
+        
+        // Show header and paginated results
+        content += currentData.htmlHeader;
+        content += pageResults.map(item => item.outerHTML).join('');
+        
+        // Add pagination controls
+        if (totalPages > 1) {
+          content += '<div class="pagination">';
+          content += `<button onclick="goToPageSimple(1)" ${validPage === 1 ? 'disabled' : ''} title="First Page">⏮ First</button>`;
+          content += `<button onclick="goToPageSimple(${validPage - 1})" ${validPage === 1 ? 'disabled' : ''} title="Previous Page">◀ Previous</button>`;
+          content += `<span class="page-info">Page ${validPage} of ${totalPages}</span>`;
+          content += `<button onclick="goToPageSimple(${validPage + 1})" ${validPage === totalPages ? 'disabled' : ''} title="Next Page">Next ▶</button>`;
+          content += `<button onclick="goToPageSimple(${totalPages})" ${validPage === totalPages ? 'disabled' : ''} title="Last Page">Last ⏭</button>`;
+          content += '</div>';
+        }
+        
+        els.results.innerHTML = content;
+        els.results.hidden = false;
+        return;
+      }
+      
+      // Original logic for non-simple providers
+      // Add pagination info header
+      if (pagination.total_results > 0) {
+        const start = (pagination.current_page - 1) * pagination.per_page + 1;
+        const end = Math.min(start + pagination.per_page - 1, pagination.total_results);
+        content += `<div style="margin-bottom: 1rem; padding: 0.75rem; background: rgba(59, 130, 246, 0.15); border-radius: 8px; border-left: 3px solid var(--accent);">`;
+        content += `<strong>Showing results ${start}-${end} of ${pagination.total_results}</strong> (Page ${pagination.current_page} of ${pagination.total_pages})`;
+        content += `</div>`;
+      }
+      
+      // Show top results summary for non-simple providers
+      if (provider !== 'simple' || !isHtml) {
+        const lines = ['<pre>Top results on this page:'];
+        for (const r of (data.results || [])) {
+          const score = (typeof r.score === 'number') ? r.score.toFixed(3) : String(r.score);
+          lines.push(`- ${r.id} (score=${score})`);
+        }
+        lines.push('\n==== ANSWER ====\n');
+        content += lines.join('\n') + '</pre>';
+      }
+      
+      // Render answer as HTML if it contains HTML tags, otherwise as text
+      if (isHtml) {
+        content += answer;
+      } else {
+        content += `<pre>${escapeHtml(answer)}</pre>`;
+      }
+      
+      // Add pagination controls
+      if (pagination.total_pages > 1) {
+        content += '<div class="pagination">';
+        content += `<button onclick="goToPage(1)" ${pagination.current_page === 1 ? 'disabled' : ''} title="First Page">⏮ First</button>`;
+        content += `<button onclick="goToPage(${pagination.current_page - 1})" ${pagination.current_page === 1 ? 'disabled' : ''} title="Previous Page">◀ Previous</button>`;
+        content += `<span class="page-info">Page ${pagination.current_page} of ${pagination.total_pages}</span>`;
+        content += `<button onclick="goToPage(${pagination.current_page + 1})" ${pagination.current_page === pagination.total_pages ? 'disabled' : ''} title="Next Page">Next ▶</button>`;
+        content += `<button onclick="goToPage(${pagination.total_pages})" ${pagination.current_page === pagination.total_pages ? 'disabled' : ''} title="Last Page">Last ⏭</button>`;
+        content += '</div>';
+      }
+      
+      els.results.innerHTML = content;
+      els.results.hidden = false;
+    }
+    
+    function goToPageSimple(page) {
+      if (!currentData) return;
+      showResults(currentData, page);
+      // Scroll to top of results
+      els.results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    
+    function goToPage(page) {
+      if (!currentData || !currentData.pagination) return;
+      if (page < 1 || page > currentData.pagination.total_pages) return;
+      
+      // Recalculate which results to show on this page
+      const per_page = currentData.pagination.per_page;
+      const start_idx = (page - 1) * per_page;
+      const end_idx = start_idx + per_page;
+      const page_results = currentData.all_results.slice(start_idx, end_idx);
+      
+      // Update pagination info
+      const updatedData = {
+        ...currentData,
+        results: page_results,
+        pagination: {
+          ...currentData.pagination,
+          current_page: page
+        }
+      };
+      
+      showResults(updatedData, page);
+      // Scroll to top of results
+      els.results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Toggle help section visibility
+    function toggleHelp() {
+      const helpSection = document.getElementById('helpSection');
+      const btnHelp = document.getElementById('btnHelp');
+      if (helpSection.style.display === 'none') {
+        helpSection.style.display = 'block';
+        btnHelp.title = 'Hide Help';
+        btnHelp.textContent = '❌';
+      } else {
+        helpSection.style.display = 'none';
+        btnHelp.title = 'Show Help';
+        btnHelp.textContent = '❓';
+      }
+    }
+
+    // Clear search results and reset form
+    function clearResults() {
+      els.results.innerHTML = '';
+      els.results.hidden = true;
+      els.query.value = '';
+      currentData = null;
+      showStatus('Results cleared.', 'ok');
+      els.query.focus();
+    }
+
+    async function health() {
+      try {
+        const resp = await fetch(`${API_BASE}/health`);
+        const data = await resp.json();
+        if (data.index_loaded) {
+          showStatus('Server ready. Index loaded.', 'ok');
+        } else {
+          showStatus('Server running, but index NOT loaded. Rebuild or set RAG_INDEX_PATH.', 'err');
+        }
+      } catch (e) {
+        showStatus(`Health check failed: ${e.message}`, 'err');
+      }
+    }
+
+    async function runQuery(q, page = 1) {
+      const per_page = parseInt(els.topk.value || '10', 10);
+      const provider = els.provider.value || 'simple';
+      const index_path = els.indexPath.value.trim();
+      const payload = { q, per_page, page, provider };
+      if (index_path) payload.index_path = index_path;
+
+      showStatus('Searching…');
+      els.results.hidden = true;
+      try {
+        const resp = await fetch(`${API_BASE}/query`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!resp.ok) {
+          const errText = await resp.text();
+          throw new Error(`HTTP ${resp.status}: ${errText}`);
+        }
+        const data = await resp.json();
+        showStatus('Done', 'ok');
+        showResults(data);
+      } catch (e) {
+        showStatus(`Error: ${e.message}`, 'err');
+      }
+    }
+
+    // Wire up events
+    els.form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const q = els.query.value.trim();
+      if (!q) return;
+      await runQuery(q);
+    });
+    els.btnLucky.addEventListener('click', async () => {
+      const samples = [
+        'RPC',
+        'ERROR',
+        'WARN',
+        'plugin',
+        'HABITAT',
+        'client handle',
+        'ERCOT',
+        'database'
+      ];
+      els.query.value = samples[Math.floor(Math.random() * samples.length)];
+      els.form.dispatchEvent(new Event('submit'));
+    });
+
+    // Initial
+    health();
+  </script>
+</body>
+</html>

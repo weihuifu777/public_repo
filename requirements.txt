@@ -1,0 +1,25 @@
+# Core dependencies
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+joblib>=1.3.0
+
+# Web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# PDF processing
+PyPDF2>=3.0.0
+
+# Word document processing
+python-docx>=0.8.11
+
+# Visualization (optional, for analysis)
+matplotlib>=3.7.0
+scipy>=1.11.0
+
+# LLM Providers (install as needed)
+openai>=1.0.0                    # For OpenAI GPT provider
+# llama-cpp-python>=0.2.0        # For local LLM (uncomment if needed)
+# gpt4all>=2.0.0                 # For GPT4All provider (uncomment if needed)
+# sentence-transformers>=2.2.0  # For dense embeddings (future enhancement)
