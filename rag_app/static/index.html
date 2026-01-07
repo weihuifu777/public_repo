@@ -98,6 +98,21 @@
       border-left-color: var(--err);
     }
     
+    [data-theme="dark"] .status.loading {
+      background: rgba(96, 165, 250, 0.15);
+      border-left-color: var(--accent);
+    }
+    
+    [data-theme="dark"] .spinner {
+      border-color: rgba(96, 165, 250, 0.2);
+      border-top-color: var(--accent);
+    }
+    
+    [data-theme="dark"] .skeleton {
+      background: linear-gradient(90deg, var(--result-bg) 25%, var(--result-hover) 50%, var(--result-bg) 75%);
+      background-size: 200% 100%;
+    }
+    
     [data-theme="dark"] .results {
       background: var(--panel);
       border-color: var(--border);
@@ -351,6 +366,9 @@
       padding: 0.5rem;
       border-radius: 4px;
       background: #f8f9fa;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
     .status.ok { 
       color: var(--ok); 
@@ -361,6 +379,72 @@
       color: var(--err);
       background: #f8d7da;
       border-left: 3px solid var(--err);
+    }
+    .status.loading {
+      color: var(--ercot-blue);
+      background: rgba(0, 102, 204, 0.1);
+      border-left: 3px solid var(--ercot-blue);
+    }
+    
+    /* Loading Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(0, 102, 204, 0.2);
+      border-top-color: var(--ercot-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Skeleton loading for results */
+    .skeleton-container {
+      padding: 1rem;
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+    .skeleton-header {
+      height: 24px;
+      width: 60%;
+      margin-bottom: 1rem;
+    }
+    .skeleton-item {
+      height: 80px;
+      margin-bottom: 0.5rem;
+      border-radius: 6px;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    /* Button loading state */
+    button.loading {
+      position: relative;
+      color: transparent;
+      pointer-events: none;
+    }
+    button.loading::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      top: 50%;
+      left: 50%;
+      margin-left: -9px;
+      margin-top: -9px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
     .results {
       margin-top: 1rem;
@@ -1315,9 +1399,26 @@
     }
 
     function showStatus(text, type='') {
-      els.status.textContent = text;
+      if (type === 'loading') {
+        els.status.innerHTML = `<span class="spinner"></span><span>${text}</span>`;
+      } else {
+        els.status.innerHTML = text;
+      }
       els.status.className = `status ${type}`;
     }
+    
+    function showLoadingSkeleton() {
+      els.results.innerHTML = `
+        <div class="skeleton-container">
+          <div class="skeleton skeleton-header"></div>
+          <div class="skeleton skeleton-item"></div>
+          <div class="skeleton skeleton-item"></div>
+          <div class="skeleton skeleton-item"></div>
+        </div>
+      `;
+      els.results.hidden = false;
+    }
+    
     function showResults(data, page = 1) {
       currentData = data;
       currentPage = page;
@@ -1512,8 +1613,10 @@
       const payload = { q, per_page, page, provider };
       if (index_path) payload.index_path = index_path;
 
-      showStatus('Searching…');
-      els.results.hidden = true;
+      showStatus('Searching…', 'loading');
+      showLoadingSkeleton();
+      els.btnSearch.classList.add('loading');
+      
       try {
         const resp = await fetch(`${API_BASE}/query`, {
           method: 'POST',
@@ -1529,6 +1632,9 @@
         showResults(data);
       } catch (e) {
         showStatus(`Error: ${e.message}`, 'err');
+        els.results.hidden = true;
+      } finally {
+        els.btnSearch.classList.remove('loading');
       }
     }
 
