@@ -529,6 +529,110 @@
       padding: 0.75rem;
       font-size: 1rem;
     }
+    
+    /* Search History Styles */
+    .search-history-container {
+      position: relative;
+    }
+    .search-history {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+    }
+    .search-history.show {
+      display: block;
+    }
+    .search-history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      background: var(--result-bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .search-history-clear {
+      background: none;
+      border: none;
+      color: var(--err);
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      min-width: auto;
+    }
+    .search-history-clear:hover {
+      background: rgba(220, 53, 69, 0.1);
+    }
+    .search-history-item {
+      padding: 0.6rem 0.75rem;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.15s;
+    }
+    .search-history-item:last-child {
+      border-bottom: none;
+    }
+    .search-history-item:hover {
+      background: var(--result-bg);
+    }
+    .search-history-item .history-icon {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .search-history-item .history-query {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text);
+    }
+    .search-history-item .history-time {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .search-history-item .history-delete {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0.2rem;
+      font-size: 0.8rem;
+      opacity: 0;
+      transition: opacity 0.15s;
+      min-width: auto;
+    }
+    .search-history-item:hover .history-delete {
+      opacity: 1;
+    }
+    .search-history-item .history-delete:hover {
+      color: var(--err);
+    }
+    .search-history-empty {
+      padding: 1rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    #btnHistory {
+      min-width: 40px;
+      padding: 0.75rem;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -555,9 +659,13 @@
     <div class="card">
       <form id="searchForm">
         <div class="row">
-          <input id="query" type="text" placeholder="Ask something…" required />
+          <div class="search-history-container" style="flex:1">
+            <input id="query" type="text" placeholder="Ask something…" required autocomplete="off" />
+            <div id="searchHistory" class="search-history"></div>
+          </div>
           <div style="display:flex; gap:.5rem">
             <button type="submit" id="btnSearch">Search</button>
+            <button type="button" class="secondary" id="btnHistory" onclick="toggleSearchHistory()" title="Search History">🕐</button>
             <button type="button" class="secondary" id="btnLucky">I'm Feeling Lucky</button>
             <button type="button" class="secondary" id="btnClear" onclick="clearResults()" title="Clear Results">🗑️ Clear</button>
             <button type="button" class="secondary" id="btnHelp" onclick="toggleHelp()" title="Show Help">❓</button>
@@ -686,6 +794,127 @@
     // Initialize theme on page load
     initTheme();
     
+    // Search History Management
+    const HISTORY_KEY = 'rag-search-history';
+    const MAX_HISTORY = 20;
+    
+    function getSearchHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+    
+    function saveSearchHistory(history) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
+    
+    function addToHistory(query) {
+      const q = query.trim();
+      if (!q) return;
+      
+      let history = getSearchHistory();
+      // Remove duplicate if exists
+      history = history.filter(item => item.query.toLowerCase() !== q.toLowerCase());
+      // Add new entry at the beginning
+      history.unshift({
+        query: q,
+        timestamp: Date.now()
+      });
+      // Keep only MAX_HISTORY items
+      history = history.slice(0, MAX_HISTORY);
+      saveSearchHistory(history);
+    }
+    
+    function removeFromHistory(index) {
+      let history = getSearchHistory();
+      history.splice(index, 1);
+      saveSearchHistory(history);
+      renderSearchHistory();
+    }
+    
+    function clearSearchHistory() {
+      localStorage.removeItem(HISTORY_KEY);
+      renderSearchHistory();
+    }
+    
+    function formatTimeAgo(timestamp) {
+      const seconds = Math.floor((Date.now() - timestamp) / 1000);
+      if (seconds < 60) return 'just now';
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      const days = Math.floor(hours / 24);
+      if (days < 7) return `${days}d ago`;
+      return new Date(timestamp).toLocaleDateString();
+    }
+    
+    function renderSearchHistory() {
+      const container = document.getElementById('searchHistory');
+      const history = getSearchHistory();
+      
+      if (history.length === 0) {
+        container.innerHTML = '<div class="search-history-empty">No search history yet</div>';
+        return;
+      }
+      
+      let html = `
+        <div class="search-history-header">
+          <span>🕐 Recent Searches (${history.length})</span>
+          <button type="button" class="search-history-clear" onclick="clearSearchHistory()">Clear All</button>
+        </div>
+      `;
+      
+      history.forEach((item, index) => {
+        html += `
+          <div class="search-history-item" onclick="selectHistoryItem('${escapeHtml(item.query.replace(/'/g, "\\'"))}')">
+            <span class="history-icon">🔍</span>
+            <span class="history-query">${escapeHtml(item.query)}</span>
+            <span class="history-time">${formatTimeAgo(item.timestamp)}</span>
+            <button type="button" class="history-delete" onclick="event.stopPropagation(); removeFromHistory(${index})" title="Remove">✕</button>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+    
+    function selectHistoryItem(query) {
+      document.getElementById('query').value = query;
+      hideSearchHistory();
+      document.getElementById('searchForm').dispatchEvent(new Event('submit'));
+    }
+    
+    function toggleSearchHistory() {
+      const container = document.getElementById('searchHistory');
+      if (container.classList.contains('show')) {
+        hideSearchHistory();
+      } else {
+        showSearchHistory();
+      }
+    }
+    
+    function showSearchHistory() {
+      renderSearchHistory();
+      document.getElementById('searchHistory').classList.add('show');
+    }
+    
+    function hideSearchHistory() {
+      document.getElementById('searchHistory').classList.remove('show');
+    }
+    
+    // Close history when clicking outside
+    document.addEventListener('click', (e) => {
+      const container = document.getElementById('searchHistory');
+      const historyBtn = document.getElementById('btnHistory');
+      const queryInput = document.getElementById('query');
+      if (!container.contains(e.target) && e.target !== historyBtn && e.target !== queryInput) {
+        hideSearchHistory();
+      }
+    });
+    
     // If you serve this page from a different origin, set API_BASE to that URL.
     const API_BASE = ''; // '' means same origin, e.g., http://localhost:8000
 
@@ -698,6 +927,7 @@
       btnSearch: document.getElementById('btnSearch'),
       btnLucky: document.getElementById('btnLucky'),
       btnRebuild: document.getElementById('btnRebuild'),
+      btnHistory: document.getElementById('btnHistory'),
       status: document.getElementById('status'),
       results: document.getElementById('results')
     };
@@ -958,6 +1188,8 @@
       const q = els.query.value.trim();
       if (!q) return;
       await runQuery(q);
+      addToHistory(q);
+      hideSearchHistory();
     });
     els.btnLucky.addEventListener('click', async () => {
       const samples = [
@@ -972,6 +1204,28 @@
       ];
       els.query.value = samples[Math.floor(Math.random() * samples.length)];
       els.form.dispatchEvent(new Event('submit'));
+    });
+
+    // Search history events
+    els.btnHistory.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleSearchHistory();
+    });
+
+    els.query.addEventListener('focus', () => {
+      const history = getSearchHistory();
+      if (history.length > 0) {
+        showSearchHistory();
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const container = document.querySelector('.search-history-container');
+      if (container && !container.contains(e.target)) {
+        hideSearchHistory();
+      }
     });
 
     // Initial
