@@ -112,6 +112,29 @@
       background: var(--result-hover);
     }
     
+    [data-theme="dark"] .result-item.collapsed .result-text {
+      background: var(--panel);
+    }
+    
+    [data-theme="dark"] .collapse-toggle {
+      background: var(--panel);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] .collapse-toggle:hover {
+      background: var(--result-hover);
+    }
+    
+    [data-theme="dark"] .collapse-all-controls button {
+      background: var(--panel);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    
+    [data-theme="dark"] .collapse-all-controls button:hover {
+      background: var(--result-hover);
+    }
+    
     [data-theme="dark"] .result-text mark {
       background: var(--mark-bg);
       color: var(--mark-text);
@@ -359,6 +382,64 @@
     .result-item:hover {
       background: #e9ecef;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Collapsible result styles */
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .result-header-content {
+      flex: 1;
+    }
+    .collapse-toggle {
+      background: #e9ecef;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--text);
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .collapse-toggle:hover {
+      background: #dee2e6;
+    }
+    .result-item .result-text {
+      max-height: 500px;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out;
+    }
+    .result-item.collapsed .result-text {
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      opacity: 0;
+    }
+    .result-item.collapsed {
+      padding-bottom: 0.5rem;
+    }
+    .collapse-all-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      justify-content: flex-end;
+    }
+    .collapse-all-controls button {
+      background: #e9ecef;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.4rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .collapse-all-controls button:hover {
+      background: #dee2e6;
     }
     .result-file {
       margin-bottom: 0.5rem;
@@ -904,7 +985,7 @@
     function hideSearchHistory() {
       document.getElementById('searchHistory').classList.remove('show');
     }
-    
+
     // Close history when clicking outside
     document.addEventListener('click', (e) => {
       const container = document.getElementById('searchHistory');
@@ -914,7 +995,91 @@
         hideSearchHistory();
       }
     });
-    
+
+    // Collapsible Results Functions
+    function toggleResultCollapse(btn) {
+      const resultItem = btn.closest('.result-item');
+      if (resultItem.classList.contains('collapsed')) {
+        resultItem.classList.remove('collapsed');
+        btn.textContent = '▲ Collapse';
+        btn.title = 'Collapse this result';
+      } else {
+        resultItem.classList.add('collapsed');
+        btn.textContent = '▼ Expand';
+        btn.title = 'Expand this result';
+      }
+    }
+
+    function collapseAllResults() {
+      const results = document.querySelectorAll('.result-item');
+      results.forEach(item => {
+        item.classList.add('collapsed');
+        const btn = item.querySelector('.collapse-toggle');
+        if (btn) {
+          btn.textContent = '▼ Expand';
+          btn.title = 'Expand this result';
+        }
+      });
+    }
+
+    function expandAllResults() {
+      const results = document.querySelectorAll('.result-item');
+      results.forEach(item => {
+        item.classList.remove('collapsed');
+        const btn = item.querySelector('.collapse-toggle');
+        if (btn) {
+          btn.textContent = '▲ Collapse';
+          btn.title = 'Collapse this result';
+        }
+      });
+    }
+
+    // Make result items collapsible by wrapping content
+    function makeResultsCollapsible(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const resultItems = doc.querySelectorAll('.result-item');
+      
+      resultItems.forEach((item, index) => {
+        // Find the file info and text content
+        const fileDiv = item.querySelector('.result-file');
+        const textDiv = item.querySelector('.result-text');
+        
+        if (fileDiv && textDiv) {
+          // Create header wrapper
+          const header = document.createElement('div');
+          header.className = 'result-header';
+          
+          const headerContent = document.createElement('div');
+          headerContent.className = 'result-header-content';
+          headerContent.appendChild(fileDiv.cloneNode(true));
+          
+          const toggleBtn = document.createElement('button');
+          toggleBtn.className = 'collapse-toggle';
+          toggleBtn.textContent = '▲ Collapse';
+          toggleBtn.title = 'Collapse this result';
+          toggleBtn.onclick = function() { toggleResultCollapse(this); };
+          
+          header.appendChild(headerContent);
+          header.appendChild(toggleBtn);
+          
+          // Replace original file div with header
+          fileDiv.parentNode.replaceChild(header, fileDiv);
+        }
+      });
+      
+      // Add collapse all controls at the beginning if there are results
+      if (resultItems.length > 1) {
+        const controlsHtml = `<div class="collapse-all-controls">
+          <button onclick="expandAllResults()" title="Expand all results">📖 Expand All</button>
+          <button onclick="collapseAllResults()" title="Collapse all results">📕 Collapse All</button>
+        </div>`;
+        return controlsHtml + doc.body.innerHTML;
+      }
+      
+      return doc.body.innerHTML;
+    }
+
     // If you serve this page from a different origin, set API_BASE to that URL.
     const API_BASE = ''; // '' means same origin, e.g., http://localhost:8000
 
@@ -1019,6 +1184,9 @@
         content += currentData.htmlHeader;
         content += pageResults.map(item => item.outerHTML).join('');
         
+        // Apply collapsible functionality
+        content = makeResultsCollapsible(content);
+        
         // Add pagination controls
         if (totalPages > 1) {
           content += '<div class="pagination">';
@@ -1059,6 +1227,8 @@
       // Render answer as HTML if it contains HTML tags, otherwise as text
       if (isHtml) {
         content += answer;
+        // Apply collapsible functionality for HTML content
+        content = makeResultsCollapsible(content);
       } else {
         content += `<pre>${escapeHtml(answer)}</pre>`;
       }
