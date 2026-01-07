@@ -1,0 +1,46 @@
+# Byte-compiled / cache
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+
+# Data and logs - ignore generated/large files in data/
+/data/*.log
+/data/*.dbg
+/data/*.db
+/data/*.out
+/data/*.perm
+/data/*.err
+/data/*.txt
+/data/*.pdf
+/data/*.docx
+/data/*.doc
+/data/mlf_*
+/data/expsfcst_logs/
+
+# Results - ignore generated output files
+/results/*.pdf
+/results/*.csv
+/results/*.docx
+/results/*.doc
+
+# Index file (optional to ignore)
+data/index.joblib
+
+# Local env files
+.env
+.env.*
+
+# OS
+.DS_Store
+
+# Application logs
+/logs/
