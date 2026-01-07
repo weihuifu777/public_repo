@@ -1058,7 +1058,7 @@
           toggleBtn.className = 'collapse-toggle';
           toggleBtn.textContent = '▲ Collapse';
           toggleBtn.title = 'Collapse this result';
-          toggleBtn.onclick = function() { toggleResultCollapse(this); };
+          toggleBtn.setAttribute('onclick', 'toggleResultCollapse(this)');
           
           header.appendChild(headerContent);
           header.appendChild(toggleBtn);
