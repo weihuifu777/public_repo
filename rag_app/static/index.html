@@ -19,6 +19,154 @@
       --ok: #28a745;              /* Green for success */
       --err: #dc3545;             /* Red for errors */
       --border: #dddddd;          /* Light border */
+      --input-bg: #ffffff;        /* Input background */
+      --result-bg: #f8f9fa;       /* Result item background */
+      --result-hover: #e9ecef;    /* Result item hover */
+      --code-bg: rgba(0, 48, 135, 0.1);  /* Code background */
+      --mark-bg: #fff3cd;         /* Highlight background */
+      --mark-text: #856404;       /* Highlight text */
+    }
+    
+    /* Dark theme */
+    [data-theme="dark"] {
+      --ercot-blue: #4d94ff;
+      --ercot-light-blue: #66a3ff;
+      --ercot-dark-blue: #3385ff;
+      --bg: #1a1a2e;
+      --panel: #16213e;
+      --text: #e8e8e8;
+      --muted: #a0a0a0;
+      --accent: #4d94ff;
+      --accent-d: #3385ff;
+      --ok: #4ade80;
+      --err: #f87171;
+      --border: #2d3748;
+      --input-bg: #1e2a47;
+      --result-bg: #1e2a47;
+      --result-hover: #283555;
+      --code-bg: rgba(77, 148, 255, 0.15);
+      --mark-bg: #4d3800;
+      --mark-text: #ffd966;
+    }
+    
+    [data-theme="dark"] .ercot-header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+    
+    [data-theme="dark"] input[type="text"],
+    [data-theme="dark"] select,
+    [data-theme="dark"] input[type="number"] {
+      background: var(--input-bg);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] input[type="text"]::placeholder {
+      color: #666;
+    }
+    
+    [data-theme="dark"] button {
+      background: linear-gradient(180deg, var(--ercot-light-blue), var(--ercot-blue));
+    }
+    
+    [data-theme="dark"] button:hover {
+      background: linear-gradient(180deg, var(--ercot-blue), var(--ercot-dark-blue));
+    }
+    
+    [data-theme="dark"] button.secondary {
+      background: var(--panel);
+      color: var(--accent);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] button.secondary:hover {
+      background: var(--result-bg);
+      border-color: var(--accent);
+    }
+    
+    [data-theme="dark"] .status {
+      background: var(--result-bg);
+    }
+    
+    [data-theme="dark"] .status.ok {
+      background: rgba(74, 222, 128, 0.15);
+      border-left-color: var(--ok);
+    }
+    
+    [data-theme="dark"] .status.err {
+      background: rgba(248, 113, 113, 0.15);
+      border-left-color: var(--err);
+    }
+    
+    [data-theme="dark"] .results {
+      background: var(--panel);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] .result-item {
+      background: var(--result-bg);
+      border-left-color: var(--accent);
+    }
+    
+    [data-theme="dark"] .result-item:hover {
+      background: var(--result-hover);
+    }
+    
+    [data-theme="dark"] .result-text mark {
+      background: var(--mark-bg);
+      color: var(--mark-text);
+    }
+    
+    [data-theme="dark"] .pagination {
+      background: var(--result-bg);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] .pagination button:disabled {
+      background: var(--panel);
+      color: var(--muted);
+    }
+    
+    [data-theme="dark"] .help-section {
+      background: linear-gradient(135deg, #1e2a47 0%, #16213e 100%);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] .help-desc code {
+      background: var(--code-bg);
+      color: var(--accent);
+    }
+    
+    [data-theme="dark"] .footer {
+      background: var(--panel);
+      border-top-color: var(--border);
+    }
+    
+    /* Theme toggle button */
+    .theme-toggle {
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+      min-width: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .theme-toggle:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+    .theme-toggle .theme-icon {
+      font-size: 1.2rem;
+    }
+    .theme-toggle .theme-label {
+      font-size: 0.85rem;
+      font-weight: 500;
     }
     body {
       margin: 0;
@@ -389,6 +537,10 @@
       <div class="ercot-logo">ERCOT</div>
       <div class="ercot-title">ERCOT Internal Knowledge Base Tool</div>
       <div class="header-actions">
+        <button class="theme-toggle" id="btnTheme" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+          <span class="theme-icon">🌙</span>
+          <span class="theme-label">Dark</span>
+        </button>
         <button class="rebuild-btn" id="btnRebuild" onclick="rebuildIndex()">🔄 Rebuild Index</button>
       </div>
     </div>
@@ -497,6 +649,43 @@
   </div>
 
   <script>
+    // Theme management
+    function initTheme() {
+      const savedTheme = localStorage.getItem('rag-theme') || 'light';
+      setTheme(savedTheme);
+    }
+    
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('rag-theme', theme);
+      updateThemeButton(theme);
+    }
+    
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      setTheme(newTheme);
+    }
+    
+    function updateThemeButton(theme) {
+      const btn = document.getElementById('btnTheme');
+      if (!btn) return;
+      const icon = btn.querySelector('.theme-icon');
+      const label = btn.querySelector('.theme-label');
+      if (theme === 'dark') {
+        icon.textContent = '☀️';
+        label.textContent = 'Light';
+        btn.title = 'Switch to Light Mode';
+      } else {
+        icon.textContent = '🌙';
+        label.textContent = 'Dark';
+        btn.title = 'Switch to Dark Mode';
+      }
+    }
+    
+    // Initialize theme on page load
+    initTheme();
+    
     // If you serve this page from a different origin, set API_BASE to that URL.
     const API_BASE = ''; // '' means same origin, e.g., http://localhost:8000
 
