@@ -135,6 +135,19 @@
       background: var(--result-hover);
     }
     
+    [data-theme="dark"] .export-dropdown {
+      background: var(--panel);
+      border-color: var(--border);
+    }
+    
+    [data-theme="dark"] .export-dropdown button {
+      color: var(--text);
+    }
+    
+    [data-theme="dark"] .export-dropdown button:hover {
+      background: var(--result-hover);
+    }
+    
     [data-theme="dark"] .result-text mark {
       background: var(--mark-bg);
       color: var(--mark-text);
@@ -440,6 +453,45 @@
     }
     .collapse-all-controls button:hover {
       background: #dee2e6;
+    }
+    .export-container {
+      position: relative;
+    }
+    .export-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+      min-width: 140px;
+      margin-top: 4px;
+    }
+    .export-dropdown.show {
+      display: block;
+    }
+    .export-dropdown button {
+      display: block;
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+    .export-dropdown button:hover {
+      background: #f0f0f0;
+    }
+    .export-dropdown button:first-child {
+      border-radius: 4px 4px 0 0;
+    }
+    .export-dropdown button:last-child {
+      border-radius: 0 0 4px 4px;
     }
     .result-file {
       margin-bottom: 0.5rem;
@@ -1034,6 +1086,126 @@
       });
     }
 
+    // Export Results Functions
+    function toggleExportMenu(event) {
+      event.stopPropagation();
+      const dropdown = document.getElementById('exportDropdown');
+      dropdown.classList.toggle('show');
+    }
+
+    // Close export dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('exportDropdown');
+      if (dropdown && !e.target.closest('.export-container')) {
+        dropdown.classList.remove('show');
+      }
+    });
+
+    function exportResults(format) {
+      const dropdown = document.getElementById('exportDropdown');
+      dropdown.classList.remove('show');
+      
+      if (!currentData) {
+        alert('No results to export');
+        return;
+      }
+      
+      const resultItems = document.querySelectorAll('.result-item');
+      if (resultItems.length === 0) {
+        alert('No results to export');
+        return;
+      }
+      
+      // Extract data from result items
+      const results = [];
+      resultItems.forEach((item, index) => {
+        const fileLink = item.querySelector('.result-file a');
+        const locationSpan = item.querySelector('.result-location');
+        const textDiv = item.querySelector('.result-text');
+        
+        results.push({
+          index: index + 1,
+          file: fileLink ? fileLink.textContent.trim() : '',
+          location: locationSpan ? locationSpan.textContent.trim() : '',
+          text: textDiv ? textDiv.textContent.trim() : ''
+        });
+      });
+      
+      let content, filename, mimeType;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      
+      switch (format) {
+        case 'csv':
+          content = exportToCSV(results);
+          filename = `search_results_${timestamp}.csv`;
+          mimeType = 'text/csv';
+          break;
+        case 'json':
+          content = exportToJSON(results);
+          filename = `search_results_${timestamp}.json`;
+          mimeType = 'application/json';
+          break;
+        case 'txt':
+          content = exportToText(results);
+          filename = `search_results_${timestamp}.txt`;
+          mimeType = 'text/plain';
+          break;
+        default:
+          return;
+      }
+      
+      downloadFile(content, filename, mimeType);
+    }
+
+    function exportToCSV(results) {
+      const headers = ['#', 'File', 'Location', 'Text'];
+      const rows = results.map(r => [
+        r.index,
+        `"${r.file.replace(/"/g, '""')}"`,
+        `"${r.location.replace(/"/g, '""')}"`,
+        `"${r.text.replace(/"/g, '""').replace(/\n/g, ' ')}"`
+      ]);
+      return [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    }
+
+    function exportToJSON(results) {
+      const query = els.query.value.trim();
+      return JSON.stringify({
+        query: query,
+        exportDate: new Date().toISOString(),
+        totalResults: results.length,
+        results: results
+      }, null, 2);
+    }
+
+    function exportToText(results) {
+      const query = els.query.value.trim();
+      let text = `Search Results for: "${query}"\n`;
+      text += `Exported: ${new Date().toLocaleString()}\n`;
+      text += `Total Results: ${results.length}\n`;
+      text += '='.repeat(60) + '\n\n';
+      
+      results.forEach(r => {
+        text += `[${r.index}] ${r.file}\n`;
+        text += `    ${r.location}\n`;
+        text += `    ${r.text.substring(0, 200)}${r.text.length > 200 ? '...' : ''}\n\n`;
+      });
+      
+      return text;
+    }
+
+    function downloadFile(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
     // Make result items collapsible by wrapping content
     function makeResultsCollapsible(html) {
       const parser = new DOMParser();
@@ -1069,10 +1241,18 @@
       });
       
       // Add collapse all controls at the beginning if there are results
-      if (resultItems.length > 1) {
+      if (resultItems.length > 0) {
         const controlsHtml = `<div class="collapse-all-controls">
-          <button onclick="expandAllResults()" title="Expand all results">📖 Expand All</button>
-          <button onclick="collapseAllResults()" title="Collapse all results">📕 Collapse All</button>
+          ${resultItems.length > 1 ? '<button onclick="expandAllResults()" title="Expand all results">📖 Expand All</button>' : ''}
+          ${resultItems.length > 1 ? '<button onclick="collapseAllResults()" title="Collapse all results">📕 Collapse All</button>' : ''}
+          <div class="export-container">
+            <button onclick="toggleExportMenu(event)" title="Export results">📥 Export</button>
+            <div id="exportDropdown" class="export-dropdown">
+              <button onclick="exportResults('csv')">📄 Export as CSV</button>
+              <button onclick="exportResults('json')">📋 Export as JSON</button>
+              <button onclick="exportResults('txt')">📝 Export as Text</button>
+            </div>
+          </div>
         </div>`;
         return controlsHtml + doc.body.innerHTML;
       }
